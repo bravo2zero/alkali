@@ -1,0 +1,26 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+
+    <changeSet id="test01" author="bravo2zero">
+    <comment>This will be executed in 'home' db schema</comment>
+        <createTable tableName="TEST_TABLE">
+            <column name="ID" type="INT(10)"/>
+            <column name="NAME" type="VARCHAR(32)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="test02" author="bravo2zero">
+		<preConditions>
+			<tableExists tableName="TEST_TABLE"/>
+		</preConditions>
+		<comment>This will read data from 'remote' and copy to 'home' schema</comment>
+		<customChange class="com.bravo2zero.alkali.change.TestRemoteChange">
+            <param name="remoteSchemaName" value="db2"/>
+        </customChange>
+    </changeSet>
+
+
+</databaseChangeLog>
