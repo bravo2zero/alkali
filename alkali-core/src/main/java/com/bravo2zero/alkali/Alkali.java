@@ -1,5 +1,9 @@
 package com.bravo2zero.alkali;
 
+import com.bravo2zero.alkali.cli.CommandLineParameter;
+import com.bravo2zero.alkali.exceptions.InitializationException;
+import com.bravo2zero.alkali.exceptions.ProcessingException;
+import com.bravo2zero.alkali.utils.Stopwatch;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
@@ -9,18 +13,9 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.log4j.xml.DOMConfigurator;
-import com.bravo2zero.alkali.cli.CommandLineParameter;
-import com.bravo2zero.alkali.exceptions.InitializationException;
-import com.bravo2zero.alkali.exceptions.ProcessingException;
-import com.bravo2zero.alkali.utils.Stopwatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -38,6 +33,18 @@ public class Alkali {
 	private CommandLine commandLine;
 	private Options options;
 	private ApplicationContext context;
+
+	public static void main(String[] args) throws Exception {
+		Alkali alkali = new Alkali();
+		try {
+
+			alkali.initialize(args);
+			alkali.execute();
+		} catch (Exception e) {
+			LOGGER.error("Exception during db tool execution", e);
+			alkali.printUsageInfo();
+		}
+	}
 
 	public Alkali() {
 		initializeOptions();

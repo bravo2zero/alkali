@@ -1,5 +1,18 @@
 package com.bravo2zero.alkali;
 
+import com.bravo2zero.alkali.cli.CommandLineParameter;
+import com.bravo2zero.alkali.exceptions.DataSourceNotRegisteredException;
+import com.bravo2zero.alkali.exceptions.UnknownEnvironmentException;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -7,16 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
-
-import com.bravo2zero.alkali.cli.CommandLineParameter;
-import com.bravo2zero.alkali.exceptions.DataSourceNotRegisteredException;
-import com.bravo2zero.alkali.exceptions.UnknownEnvironmentException;
+import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
+import static org.springframework.util.ResourceUtils.FILE_URL_PREFIX;
 
 /**
  * @author bravo2zero
@@ -30,7 +35,7 @@ public class DataSourceManager {
 
 	public void initialize(CommandLine commandLine) throws UnknownEnvironmentException, IOException {
 		environment = commandLine.getOptionValue(CommandLineParameter.ENVIRONMENT.getShortName());
-		InputStream inputStream = DataSourceManager.class.getClassLoader().getResourceAsStream(String.format("%s.properties", environment));
+		InputStream inputStream = getEnvironmentFile(String.format("%s.properties", environment));
 		if (inputStream != null) {
 			Properties properties = new Properties();
 			properties.load(inputStream);
@@ -49,6 +54,20 @@ public class DataSourceManager {
 			createDataSources(configMap, commandLine);
 		} else {
 			throw new UnknownEnvironmentException("No db properties found for environment:" + environment);
+		}
+	}
+
+	private InputStream getEnvironmentFile(String filePath) {
+		// DataSourceManager.class.getClassLoader().getResourceAsStream(filePath)
+		try {
+			return new FileInputStream(ResourceUtils.getFile(CLASSPATH_URL_PREFIX + filePath));
+		} catch (FileNotFoundException fnfe1) {
+			LOGGER.warn("No bundled properties found for environment [{}]. Trying file system...", environment);
+			try {
+				return new FileInputStream(ResourceUtils.getFile(FILE_URL_PREFIX + filePath));
+			} catch (FileNotFoundException fnfe2) {
+				return null;
+			}
 		}
 	}
 

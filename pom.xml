@@ -10,7 +10,6 @@
 
     <modules>
         <module>alkali-core</module>
-        <module>alkali-tool</module>
     </modules>
 
     <properties>

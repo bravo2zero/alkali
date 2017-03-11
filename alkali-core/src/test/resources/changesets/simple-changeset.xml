@@ -4,13 +4,13 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
 
-    <changeSet id="test01" author="bravo2zero">
-    <comment>This will be executed in 'home' db schema</comment>
-        <createTable tableName="TEST_TABLE">
-            <column name="ID" type="INT(10)"/>
-            <column name="NAME" type="VARCHAR(32)"/>
-        </createTable>
-    </changeSet>
+	<changeSet id="test01" author="bravo2zero">
+		<comment>This will be executed in 'home' db schema</comment>
+		<customChange class="com.bravo2zero.alkali.change.BasicCopyTable">
+			<param name="referenceSchemaName" value="db2"/>
+			<param name="referenceTableName" value="TEST_TABLE"/>
+		</customChange>
+	</changeSet>
 
     <changeSet id="test02" author="bravo2zero">
 		<preConditions>
